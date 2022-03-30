@@ -19,6 +19,25 @@ mamiferos =
 
 mamiferos$genus <- word(mamiferos$species,1)
 
+unique(sort(mamiferos$species))
+
+mamiferos <- mamiferos[!grepl("sp.", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Monodelphis americana/scalops", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Callithrix jacchus X Callithrix aurita", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Callithrix jacchus X Callithrix penicillata", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Callithrix penicillata x Callithrix aurita", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Unidentified rodent", mamiferos$species),]
+
+mamiferos$species <- gsub("Puma yagouaroundi","Herpailurus yagouaroundi",
+                     gsub("marmosops paulensis","Marmosops paulensis",
+                     gsub("Dasypus septemcinctus septemcinctus","Dasypus septemcinctus",
+                     gsub("Dasypus septemcinctus septemcinctus","Dasypus septemcinctus",
+                                         mamiferos$species))))
+
+unique(sort(mamiferos$species))
+
+write.csv(mamiferos, "occ_v_sp_Clean.csv")
+
 familia <- subset(mamiferos$genus, is.na(mamiferos$family))
 
 familiaLista <- unique(familia)
