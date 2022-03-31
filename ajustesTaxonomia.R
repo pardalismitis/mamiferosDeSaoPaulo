@@ -8,6 +8,7 @@ library(xlsx)
 #library(ggplot2)
 library(here)
 library(stringr)
+library(dbplyr)
 #library(vctrs)
 
 mamiferos = 
@@ -16,6 +17,12 @@ mamiferos =
            na.strings = c("", "NA"),
            encoding = "UTF-8"
   )
+
+occ_v_sp <- read.csv("occ_v_sp.csv",
+                     #sep = ";",
+                     na.strings = c("", "NA"),
+                     encoding = "UTF-8"
+)
 
 mamiferos$genus <- word(mamiferos$species,1)
 
@@ -38,55 +45,23 @@ unique(sort(mamiferos$species))
 
 write.csv(mamiferos, "occ_v_sp_Clean.csv")
 
+patterns <- c("sp.",
+              "Callithrix penicillata x Callithrix aurita",
+              "Callithrix jacchus X Callithrix aurita",
+              "Callithrix jacchus X Callithrix penicillata",
+              "Monodelphis americana/scalops",
+              "Unidentified rodent")
+
+
+occ_v_sp_filter <- occ_v_sp %>%
+  dplyr::filter(!grepl(paste(patterns, collapse = "|"), species)) %>%
+  dplyr::mutate(species = case_when(species == "Puma yagouaroundi" ~ "Herpailurus yagouaroundi",
+                                    species == "marmosops paulensis" ~ "Marmosops paulensis",
+                                    species == "Dasypus septemcinctus septemcinctus" ~ "Dasypus septemcinctus",
+                                    TRUE ~ species)) %>%
+  dplyr::mutate(genus = case_when(genus == "marmosops" ~ "Marmosops",
+                                  TRUE ~ genus)
+
 familia <- subset(mamiferos$genus, is.na(mamiferos$family))
 
 familiaLista <- unique(familia)
-
-AccChars <- "ŠŽšžŸÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðñòóôõöùúûüýÿ "
-RegChars <- "SZszYAAAAAACEEEEIIIIDNOOOOOUUUUYaaaaaaceeeeiiiidnooooouuuuyy_"
-
-for(i in 1:ncol(mapeamento)) {       
-  mapeamento[ , i] <- chartr(AccChars, RegChars, mapeamento[ , i])
-  mapeamento[ , i] <- tolower(mapeamento[ , i])
-}
-
-
-
-
-AccChars <- "ŠŽšžŸÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðñòóôõöùúûüýÿ "
-RegChars <- "SZszYAAAAAACEEEEIIIIDNOOOOOUUUUYaaaaaaceeeeiiiidnooooouuuuyy_"
-
-for(i in 1:ncol(mapeamento)) {       
-  mapeamento[ , i] <- chartr(AccChars, RegChars, mapeamento[ , i])
-  mapeamento[ , i] <- tolower(mapeamento[ , i])
-}
-
-
-mapeamento$X.U.FEFF.UC <- gsub("rio_cautario","Rio Cautário",
-                               gsub("ouro_preto","Rio Ouro Preto",
-                                    gsub("cazumba","Cazumbá-Iracema",
-                                         mapeamento$X.U.FEFF.UC)))
-
-
-mapeamento$cap <- as.integer(mapeamento$cap)
-mapeamento$cap[is.na(mapeamento$cap)] <- 0
-
-for(i in 1:nrow(mamiferos)){
-  if (mamiferos$family[!is.na(mamiferos$family)]) {
-    mamiferos$family <- mamiferos$family
-  } else if (mamiferos$genus == "Alouatta" | "Brachyteles"){
-    family <- "Atelidae"
-  #} #else if (mapeamento$cap[i] > 50 & mapeamento$cap[i] <= 100){
-    #tamanho <- "jovem-adulto"
-  #} #else if (mapeamento$cap[i] > 100 & mapeamento$cap[i] <= 150){
-   # tamanho <- "adulto"
-  #} else if (mapeamento$cap[i] > 150 & mapeamento$cap[i] <= 200){
-   # tamanho <- "adulto-senescente"
-  } else {
-     family <- ""
-  }
-  mamiferos$family[i] <- family
-}
-
-
-write.xlsx(mapeamento, here("output", "formulario6Mapeamento.xlsx"), sheetName = "formulario6Mapeamento", col.names = TRUE, row.names = TRUE, append = FALSE)
