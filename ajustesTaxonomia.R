@@ -1,15 +1,7 @@
 rm(list = ls(all = TRUE))
-#install.packages("here")
-#install.packages("tidyverse")
-#install.packages("ggplot2")
-#install.packages("vctrs")
-#library(tidyverse)
-library(xlsx)
-#library(ggplot2)
 library(here)
 library(stringr)
 library(dbplyr)
-#library(vctrs)
 
 mamiferos = 
   read.csv("occ_v_sp.csv",
@@ -17,14 +9,6 @@ mamiferos =
            na.strings = c("", "NA"),
            encoding = "UTF-8"
   )
-
-occ_v_sp <- read.csv("occ_v_sp.csv",
-                     #sep = ";",
-                     na.strings = c("", "NA"),
-                     encoding = "UTF-8"
-)
-
-mamiferos$genus <- word(mamiferos$species,1)
 
 unique(sort(mamiferos$species))
 
@@ -38,13 +22,28 @@ mamiferos <- mamiferos[!grepl("Unidentified rodent", mamiferos$species),]
 mamiferos$species <- gsub("Puma yagouaroundi","Herpailurus yagouaroundi",
                      gsub("marmosops paulensis","Marmosops paulensis",
                      gsub("Dasypus septemcinctus septemcinctus","Dasypus septemcinctus",
-                     gsub("Dasypus septemcinctus septemcinctus","Dasypus septemcinctus",
+                     gsub("Leopardus tigrinus","Leopardus guttulus",
                                          mamiferos$species))))
-
+#check
 unique(sort(mamiferos$species))
 
-write.csv(mamiferos, "occ_v_sp_Clean.csv")
+unique(sort(mamiferos$genus))
 
+#get genus from species
+mamiferos$genus <- word(mamiferos$species,1)
+
+#check family
+unique(sort(mamiferos$family))
+
+#correction
+mamiferos$family <- gsub("Felídeos","Felidae", mamiferos$family)
+
+#check order
+unique(sort(mamiferos$order))
+
+write.csv(mamiferos, "occ_v_sp.csv")
+
+#alternative
 patterns <- c("sp.",
               "Callithrix penicillata x Callithrix aurita",
               "Callithrix jacchus X Callithrix aurita",
@@ -58,10 +57,10 @@ occ_v_sp_filter <- occ_v_sp %>%
   dplyr::mutate(species = case_when(species == "Puma yagouaroundi" ~ "Herpailurus yagouaroundi",
                                     species == "marmosops paulensis" ~ "Marmosops paulensis",
                                     species == "Dasypus septemcinctus septemcinctus" ~ "Dasypus septemcinctus",
+                                    species == "Leopardus tigrinus" ~ "Leopardus guttulus" #add
                                     TRUE ~ species)) %>%
   dplyr::mutate(genus = case_when(genus == "marmosops" ~ "Marmosops",
-                                  TRUE ~ genus)
-
-familia <- subset(mamiferos$genus, is.na(mamiferos$family))
-
-familiaLista <- unique(familia)
+                                  genus == "Herpailurus" ~ "Puma" #add
+                                  TRUE ~ genus))
+  dplyr::mutate(family = case_when(family == "Felídeos" ~ "Felidae", #add
+                                 TRUE ~ family)) #add
