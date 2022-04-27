@@ -22,8 +22,22 @@ mamiferos <- mamiferos[!grepl("Unidentified rodent", mamiferos$species),]
 mamiferos$species <- gsub("Puma yagouaroundi","Herpailurus yagouaroundi",
                      gsub("marmosops paulensis","Marmosops paulensis",
                      gsub("Dasypus septemcinctus septemcinctus","Dasypus septemcinctus",
+                     gsub("Dasyprocta iacki","Dasyprocta azarae",
                      gsub("Leopardus tigrinus","Leopardus guttulus",
-                                         mamiferos$species))))
+                                         mamiferos$species)))))
+
+#remover 
+mamiferos <- mamiferos[!grepl("Bos taurus", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Callithrix jacchus", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Callithrix penicillata", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Canis familiaris", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Felis catus", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Lepus capensis", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Lepus europaeus", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Rattus norvegicus", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Rattus rattus", mamiferos$species),]
+mamiferos <- mamiferos[!grepl("Sus scrofa", mamiferos$species),]
+
 #check
 unique(sort(mamiferos$species))
 
